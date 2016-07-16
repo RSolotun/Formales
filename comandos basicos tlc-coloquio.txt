@@ -1,0 +1,6 @@
+(load 'interprete-tlc)
+(evaluar '(while (lambda (x) (NoCero (car x)))
+      (lambda (x) (list (Restar1 (car x))(* (car x)(cadr x))))
+      '(car '((5 1) 8 7)))
+      '(NoCero (lambda (x) (not (eq x 0))) Restar1 (lambda (n) (- n 1 ))))
+; ------> (0 120)

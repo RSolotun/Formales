@@ -1,0 +1,8 @@
+(load 'interprete-c)
+(RUN '( (int a b c)
+(main (
+(a = 2)
+(b = 3)
+(c = 4)
+(if (c > 11 * (a = 5 * (b = b + 1 + (c = 10)))) ((printf 111)))
+(printf a b c)))) ()) ; -----------> (70 14 10)
