@@ -12,6 +12,8 @@
   ((eq (car exp) 'cdr) (evaluar (cdr (evaluar (cadr exp) amb)) amb))
   ((eq (car exp) 'lambda) exp)
   ((listp (car exp)) (if (eq (caar exp) 'lambda) (apply (car exp) (cdr exp)) amb))
+  ((eq (car exp) 'mapcar) (mapcar (lambda (x) (evaluar (list(cadr exp) x) nil)) 
+    (evaluar (caddr exp) nil)))
   (T (mapcar (lambda (x) (evaluar x amb)) exp))
  )
 ))
