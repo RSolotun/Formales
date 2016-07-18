@@ -12,9 +12,8 @@
   ((eq (car exp) 'cdr) (evaluar (cdr (evaluar (cadr exp) amb)) amb))
   ((eq (car exp) 'lambda) exp)
   ((listp (car exp)) (if (eq (caar exp) 'lambda) (apply (car exp) (cdr exp)) amb))
-  ((eq (car exp) 'mapcar) (mapcar (lambda (x) (evaluar (list (evaluar (cadr exp)) x) nil)) 
-    (evaluar (caddr exp) nil)))
-  ((es-funcion (car exp)) (apply (car exp) (cdr exp)))
+  ((es-funcion (car exp)) (apply (car exp) (mapcar (lambda (x) (evaluar x amb)) 
+                (cdr exp))))
   (T (mapcar (lambda (x) (evaluar x amb)) exp))
  )
 ))
@@ -29,5 +28,5 @@
 
 ; Devuelve si la funcion se puede usar en un apply o no
 (defun es-funcion (fn)
-(member fn '(append + - * / < > eq atom null listp numberp length))
+(member fn '(append + - * / < > eq atom null listp numberp length mapcar))
 )
