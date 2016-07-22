@@ -25,7 +25,7 @@
 (defun asignar-valor (var val mem)
 (if (es-var var mem)
  (cons (list var val) (remove var mem :key 'car))
- (error "ERROR_VARIABLE_NO_DECLARADA."))
+ (error "(ERROR_VARIABLE_NO_DECLARADA)"))
 )
 
 ; Devuelve si la variable pertenece a la memoria
@@ -70,14 +70,14 @@
  ((reduce (lambda (x y) (and x y)) 
   (mapcar (lambda(x)(es-var x mem)) exp) :initial-value T) 
   (append (list (valor-var (car exp) mem)) (salida (cdr exp) mem)))
- (T (evaluar exp mem))
+ (T (list (evaluar exp mem)))
 ))
 
 ; Devuelve el valor de una variable
 (defun valor-var (var mem)
 (if (es-var var mem)
  (if (null (cadr (find var mem :key 'car))) 0 (cadr (find var mem :key 'car)))
- (error "ERROR_VARIABLE_NO_DECLARADA."))
+ (error "(ERROR_VARIABLE_NO_DECLARADA)"))
 )
 
 ; Evalua una expresión y devuelve el resultado
