@@ -41,6 +41,8 @@
    (asignar-valor (nth 1 (car prg)) (car val) mem) sal))
   ((eq (caar prg) 'printf) (ejecutar (cdr prg) val mem 
    (append sal (salida (cdar prg) mem))))
+  ((eq (nth 1 (car prg)) '=) (ejecutar (cdr prg) val 
+   (asignar-valor (caar prg) (evaluar (cddar prg) mem) mem) sal))
  )
 ))
 
@@ -72,7 +74,7 @@
     (apply (operador-a-funcion (nth (pos-op-menor-peso exp) exp)) 
      (cons (evaluar (butlast exp (- (length exp) (pos-op-menor-peso exp))) mem)
      (list (evaluar (nthcdr (+ '1 (pos-op-menor-peso exp)) exp) mem)))))
-     (T (mapcar (lambda (x)(evaluar x mem)) exp))))
+   (T (mapcar (lambda (x)(evaluar x mem)) exp))))
  (T (valor-var exp mem))
 ))
 
