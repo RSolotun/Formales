@@ -44,9 +44,9 @@
   ((eq (nth 1 (car prg)) '=) (ejecutar (cdr prg) val 
    (asignar-valor (caar prg) (evaluar (cddar prg) mem) mem) sal))
   ((eq (caar prg) 'if) (if (eq (evaluar (nth 1 (car prg)) mem) 1)
-   (ejecutar (cons (nth 2 (car prg)) (cdr prg)) val mem sal)
+   (ejecutar (append (nth 2 (car prg)) (cdr prg)) val mem sal)
    (if (eq (nth 3 (car prg)) 'else) 
-    (ejecutar (cons (nth 4 (car prg)) (cdr prg)) val mem sal)
+    (ejecutar (append (nth 4 (car prg)) (cdr prg)) val mem sal)
     (ejecutar (cdr prg) val mem sal))))
   ((eq (caar prg) 'while) (if (eq (evaluar (nth 1 (car prg)) mem) 1)
    (ejecutar (append (nth 2 (car prg)) prg) val mem sal)
@@ -59,6 +59,9 @@
    (ejecutar (cons (append (list (caar prg)) '(=) (list (caar prg)) '(+ 1)) (cdr prg)) val mem sal))
   ((eq (nth 1 (car prg)) '--) 
    (ejecutar (cons (append (list (caar prg)) '(=) (list (caar prg)) '(- 1)) (cdr prg)) val mem sal))
+  ((not (null (member (nth 1 (car prg)) *mapa-op-asignacion* :key 'car)))
+   (ejecutar (cons (append (list (caar prg)) '(=) (list (caar prg)) 
+    (buscar-operador (nth 1 (car prg))) (list (cddar prg))) (cdr prg)) val mem sal))
   (T (ejecutar (car prg) val mem sal))
  )
 ))
@@ -118,7 +121,7 @@
 
 ; Retorna el operador de LISP asociado a un operador de asignación.
 (defun buscar-operador (op)
-(cadr (find op *mapa-op-asignacion* :key 'car)))
+(cdr (find op *mapa-op-asignacion* :key 'car)))
 
 ; Verifica si un símbolo es un operador en C.
 (defun es-operador (op)
