@@ -12,10 +12,16 @@
   ((eq (car exp) 'cdr) (evaluar (cdr (evaluar (cadr exp) amb)) amb))
   ((eq (car exp) 'lambda) exp)
   ((buscar 'lambda amb) (evaluar exp (crear-varios amb)))
-  ((listp (car exp)) (if (eq (caar exp) 'lambda) (apply (car exp) (cdr exp)) amb))
+  ((listp (car exp)) (cond 
+   ((eq (caar exp) 'lambda) (apply (car exp) (evaluar (cdr exp) amb)))
+   (T (mapcar (lambda (x) (evaluar x amb)) exp))))
   ((es-funcion (car exp)) (apply (car exp) (mapcar (lambda (x) (evaluar x amb)) 
                 (cdr exp))))
-  ((eq amb 'amb-def) (apply (car exp) (cdr exp)))
+  ((eq (car exp) 'while) (if (evaluar (list (nth 1 exp) (evaluar (nth 3 exp) amb)) amb) 
+   (evaluar (append (butlast exp) (list (evaluar (list (nth 2 exp) 
+    (evaluar (nth 3 exp) amb)) amb))) amb) 
+   (evaluar (nth 3 exp) amb)))
+  ((and (not (null (member (car exp) amb))) (eq (car amb) 'amb-def)) (apply (car exp) (cdr exp)))
   (T (mapcar (lambda (x) (evaluar x amb)) exp))
  )
 ))
@@ -28,23 +34,25 @@
 
 ; Devuelve si la funcion se puede usar en un apply o no
 (defun es-funcion (fn)
-(member fn '(append + - * / < > eq atom null listp numberp length mapcar)))
+(not (null (member fn '(append + - * / < > eq atom null listp numberp length mapcar)))))
 
 ; Devuelve si hay un elemento en una lista multinivel
 (defun buscar (elem lista)
 (if (null lista) nil
  (if (listp lista) 
-  (or (eq (find elem lista) elem) (buscar elem (cadr lista)) (buscar elem (cddr lista)))
+  (or (eq (find elem lista) elem) 
+   (buscar elem (car lista))
+   (buscar elem (cdr lista)))
   (eq elem lista))))
 
 
 ; Arma la función definida en el ambiente
 (defun crear (name op)
-(setf (symbol-function name) (lambda (var) (funcall op var))))
+(car (cons name (setf (symbol-function name) (lambda (var) (funcall op var))))))
 
 ; Arma las funciones definidas en el ambiente
 (defun crear-varios (ambiente)
-(if (mapcar (lambda (x) (crear (car x) (cadr x))) (armar-lista ambiente)) 'amb-def nil))
+(cons 'amb-def (mapcar (lambda (x) (crear (car x) (cadr x))) (armar-lista ambiente))))
 
 ; Con una lista de pares variable valor arma una lista de listas de pares
 (defun armar-lista (lista)
