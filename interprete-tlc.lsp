@@ -1,4 +1,6 @@
+; ************************************************************
 ; Funcion principal
+; ************************************************************
 (defun evaluar(exp &optional (amb))
 (if (atom exp)
  (if (or (numberp exp) (null amb)) exp
@@ -26,35 +28,54 @@
  )
 ))
 
+
+; ************************************************************
 ; Busca valor en el ambiente y devuelve el asociado
+; ************************************************************
 (defun valor (valor amb)
 (if (null amb) nil
  (if (eq valor (car amb)) (cadr amb)
-  (valor valor (cddr amb)))))
+  (valor valor (cddr amb)))
+))
 
+  
+; ************************************************************
 ; Devuelve si la funcion se puede usar en un apply o no
+; ************************************************************
 (defun es-funcion (fn)
 (not (null (member fn '(append + - * / < > eq atom null listp numberp length mapcar)))))
 
+
+; ************************************************************
 ; Devuelve si hay un elemento en una lista multinivel
+; ************************************************************
 (defun buscar (elem lista)
 (if (null lista) nil
  (if (listp lista) 
   (or (eq (find elem lista) elem) 
    (buscar elem (car lista))
    (buscar elem (cdr lista)))
-  (eq elem lista))))
+  (eq elem lista))
+))
 
 
+; ************************************************************
 ; Arma la función definida en el ambiente
+; ************************************************************
 (defun crear (name op)
 (car (cons name (setf (symbol-function name) (lambda (var) (funcall op var))))))
 
+
+; ************************************************************
 ; Arma las funciones definidas en el ambiente
+; ************************************************************
 (defun crear-varios (ambiente)
 (cons 'amb-def (mapcar (lambda (x) (crear (car x) (cadr x))) (armar-lista ambiente))))
 
+
+; ************************************************************
 ; Con una lista de pares variable valor arma una lista de listas de pares
+; ************************************************************
 (defun armar-lista (lista)
 (if (< (length lista) '2) nil
  (cons (list (car lista) (nth 1 lista)) (armar-lista (cddr lista)))))
