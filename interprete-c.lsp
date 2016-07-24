@@ -71,6 +71,14 @@
   ((eq (nth 1 (car prg)) '=) (ejecutar (cdr prg) val 
    (asignar-valor (caar prg) (evaluar (cddar prg) mem) mem) sal))
 
+  ; IF THEN ELSE CON ASIGNACIÓN
+  ((and (eq (caar prg) 'if) (buscar '= (car prg))) 
+   (if (eq (eval-con-asig (nth 1 (car prg)) mem) 1)
+   (ejecutar (append (nth 2 (car prg)) (cdr prg)) val (arit-con-asig (nth 1 (car prg)) mem) sal)
+   (if (eq (nth 3 (car prg)) 'else)
+    (ejecutar (append (nth 4 (car prg)) (cdr prg)) val (arit-con-asig (nth 1 (car prg)) mem) sal)
+    (ejecutar (cdr prg) val (arit-con-asig (nth 1 (car prg)) mem) sal))))
+
   ; IF THEN ELSE
   ((eq (caar prg) 'if) (if (eq (evaluar (nth 1 (car prg)) mem) 1)
    (ejecutar (append (nth 2 (car prg)) (cdr prg)) val mem sal)
@@ -250,14 +258,45 @@
   (eq elem lista))
 ))
 
-  
-  ; ************************************************************
-; Recorre recursivamente una operación aritmetica que incluye asignaciones
-; y realiza las asignaciones
+
 ; ************************************************************
-(defun asignar-valor-recur (lista mem)
-(if (null (buscar '= lista)) mem
- (asignar-valor (car lista) (evaluar (cddr lista) 
-  (asignar-valor-recur (cddr lista) mem)) 
-  (asignar-valor-recur (cddr lista) mem))
+; Dada una expresión aritmética con asignaciones, devuelve la 
+; memoria cambiada por esas asignaciones 
+; ((c > 11 * (a = 5 * (b = b + 1 + (c = 10)))) ((c 4) (b 3) (a 2))) ->  ((c 10) (b 14) (a 70)))
+; ************************************************************
+(defun arit-con-asig (exp mem)
+(cond 
+ ((null exp) mem)
+ ((and (eq (nth 1 exp) '=) (eq (length exp) 3) (list-niv-1 exp)) (asignar-valor (nth 0 exp) (nth 2 exp) mem))
+ ((eq (nth 1 exp) '=) (asignar-valor (nth 0 exp) 
+  (evaluar (eval-con-asig (cddr exp) mem) mem) (arit-con-asig (cddr exp) mem)))
+ ((listp (car exp)) (arit-con-asig (car exp) mem))
+ (T (arit-con-asig (cddr exp) mem))
+))
+
+
+; ************************************************************
+; Dada una expresión aritmética con asignaciones, devuelve el 
+; valor resultante de la asignación 
+; (c > 11 * (a = 5 * (b = b + 1 + (c = 10)))) --> (c > 770)
+; ************************************************************
+(defun eval-con-asig (exp mem)
+(cond
+ ((null exp) nil)
+ ((and (eq (nth 1 exp) '=) (eq (length exp) 3) (list-niv-1 exp)) (nth 2 exp))
+ ((eq (nth 1 exp) '=) (append (list (car exp) '=) (list (evaluar (eval-con-asig (cddr exp) mem) mem))))
+ ((listp (car exp)) (eval-con-asig (car exp) mem))
+ ((and (es-operador (nth 1 exp)) (eq (length exp) 3) (list-niv-1 exp)) (evaluar exp mem))
+ (T (append (list (car exp) (nth 1 exp)) (list (evaluar (eval-con-asig (cddr exp) mem) mem))))
+))
+
+
+; ************************************************************
+; Devuelve si es una lista de un solo nivel
+; ************************************************************
+(defun list-niv-1 (lista)
+(cond
+ ((null lista) T)
+ ((listp (car lista)) nil)
+ (T (list-niv-1 (cdr lista)))
 ))
