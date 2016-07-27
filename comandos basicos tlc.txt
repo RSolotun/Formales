@@ -24,15 +24,18 @@
 (evaluar '((lambda (x) (* x 2)) 2) nil ) ;> --> 4
 (evaluar '((lambda (x y) (+ (* x 2) y)) 2 4) nil) ;> --> 8
 (evaluar '(lambda (x) (* x 2)) nil) ;> --> (lambda (x) (* x 2))
-(evaluar '(mapcar (lambda (x) (cons x (cdr '(3 4 5)))) '(1 2 3)) nil)
-;> --> ((1 4 5) (2 4 5)(3 4 5))
+(evaluar '(mapcar (lambda (x) (cons x (cdr '(3 4 5)))) 
+'(1 2 3)) nil) ;> --> ((1 4 5) (2 4 5) (3 4 5))
 ;Forma funcional mapcar
 (evaluar '(mapcar 'numberp (quote (4))) '(t)) ;> --> (t)
 (evaluar '(mapcar 'numberp (quote (4 5 6 nil)))) ;> --> (t t t nil)
 (evaluar '(mapcar 'car (quote ( (2 3) (4 5 ))) )) ;> --> (2 4)
+(evaluar '(mapcar 'sig '(1 2 3)) '(sig (lambda(x)(+ x 1)))) ;------> (2 3 4)
+(evaluar '(mapcar 'list '(1 2 3) 
+'(4 5 6)) nil) ;---> debería dar ((1 4) (2 5) (3 6))
 ;Funciones definidas en el ambiente
-(evaluar '(fact 5) '(fact (lambda(n)(if(eq n 0) 1 (* n (fact (- n 1))))) ) ) 
-;> --> 120
+(evaluar '(fact 5) '(fact (lambda(n)(if(eq n 0) 1 
+ (* n (fact (- n 1))))))) ;> --> 120
 (evaluar '(mapcar 'fact (quote ( 2 3 4 5 ) ))
 '(fact (lambda(n)(if(eq n 0) 1 (* n (fact (- n 1)))))) ) ;> --> (2 6 24 120)
 ;
@@ -42,7 +45,13 @@
       (lambda (x) (list (Restar1 (car x))(* (car x)(cadr x))))
       '(car '((5 1) 8 7)))
       '(NoCero (lambda (x) (not (eq x 0))) 
-        Restar1 (lambda (n) (- n 1 )))) ; ------> (0 120)
-(evaluar '(mapcar 'sig '(1 2 3)) '(sig (lambda(x)(+ x 1)))) ;------> (2 3 4)
-(evaluar '(mapcar 'list '(1 2 3) 
-'(4 5 6)) nil) ;---> debería dar ((1 4) (2 5) (3 6))
+        Restar1 (lambda (n) (- n 1 )))) ;> ------> (0 120)
+;
+;Ejercicio de coloquio
+;
+(evaluar '(/ 'unir '((2 5 7) (7 8 5) (5 7)))
+ '(unir (lambda (x y) (union x y)))) ;> --> (8 2 5 7)
+(evaluar '(/ 'unir '((a b c) (d a b) (c e)))
+ '(unir (lambda (x y) (union x y)))) ; --> (d e a b c)
+(evaluar '(/ '- '(100 50 10)) nil) ;> --> 60
+(evaluar '(/ append '((1 2) (3 4) (5 6))) nil) ;> --> (1 2 3 4 5 6)

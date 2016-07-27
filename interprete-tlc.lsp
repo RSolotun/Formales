@@ -47,6 +47,13 @@
    ; EVALUA MIEMBRO A MIEMBRO DE LA LISTA
    (T (mapcar (lambda (x) (evaluar x amb)) exp))))
 
+   ; / FN
+   ((and (eq (car exp) '/) (or (not (null (member (nth 1 exp) amb))) (es-funcion (car exp))))
+    (if (<= (length (evaluar (nth 2 exp) amb)) 1) (car (evaluar (nth 2 exp) amb))
+     (evaluar (append (list '/) (list (evaluar (nth 1 exp) amb)) (list (append (butlast (evaluar (nth 2 exp) amb) 2) 
+      (list (evaluar (list (nth 1 exp) (car (last (butlast (evaluar (nth 2 exp) amb)))) 
+       (car (last (evaluar (nth 2 exp) amb)))) amb))))) amb)))
+
   ; ES FUNCION ESTANDAR
   ((es-funcion (car exp)) (apply (car exp) (mapcar (lambda (x) (evaluar x amb)) 
                 (cdr exp))))
@@ -67,12 +74,13 @@
 
 
 ; ************************************************************
-; Busca valor en el ambiente y devuelve el asociado
+; Busca valor en el ambiente y devuelve el asociado, 
+; si no lo encuentra devuelve el parámetro
 ; ************************************************************
-(defun valor (valor amb)
-(if (null amb) nil
- (if (eq valor (car amb)) (cadr amb)
-  (valor valor (cddr amb)))
+(defun valor (var amb)
+(if (null amb) var
+ (if (eq var (car amb)) (cadr amb)
+  (valor var (cddr amb)))
 ))
 
   
@@ -97,9 +105,16 @@
 
 
 ; ************************************************************
-; Arma la función definida en el ambiente
+; Arma la función definida en el ambiente que tiene 2 parámetros
 ; ************************************************************
-(defun crear (name op)
+(defun crear-2-param (name op)
+(car (cons name (setf (symbol-function name) (lambda (x y) (apply op (list x y)))))))
+
+
+; ************************************************************
+; Arma la función definida en el ambiente que tiene un solo parámetro
+; ************************************************************
+(defun crear-1-param (name op)
 (car (cons name (setf (symbol-function name) (lambda (var) (funcall op var))))))
 
 
@@ -107,7 +122,12 @@
 ; Arma las funciones definidas en el ambiente
 ; ************************************************************
 (defun crear-varios (ambiente)
-(cons 'amb-def (mapcar (lambda (x) (crear (car x) (cadr x))) (armar-lista ambiente))))
+(cons 'amb-def (mapcar (lambda (x) 
+ (if (> (length (nth 1 (cadr x))) 1)
+  (crear-2-param (car x) (cadr x)) 
+  (crear-1-param (car x) (cadr x)))) 
+ (armar-lista ambiente))
+))
 
 
 ; ************************************************************
@@ -115,4 +135,5 @@
 ; ************************************************************
 (defun armar-lista (lista)
 (if (< (length lista) '2) nil
- (cons (list (car lista) (nth 1 lista)) (armar-lista (cddr lista)))))
+ (cons (list (car lista) (nth 1 lista)) (armar-lista (cddr lista)))
+))
