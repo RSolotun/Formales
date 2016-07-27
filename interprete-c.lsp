@@ -91,6 +91,9 @@
    (ejecutar (append (nth 2 (car prg)) prg) val mem sal)
    (ejecutar (cdr prg) val mem sal)))
 
+   ; SWITCH CASE
+   ((eq (caar prg) 'switch) (ejecutar (append (armar-sec-prg (car prg) mem) (cdr prg)) val mem sal))
+
   ; ++ VAR -> VAR = VAR + 1
   ((eq (caar prg) '++) 
    (ejecutar (cons (append (cdar prg) '(=) (cdar prg) '(+ 1)) (cdr prg)) val mem sal))
@@ -299,4 +302,17 @@
  ((null lista) T)
  ((listp (car lista)) nil)
  (T (list-niv-1 (cdr lista)))
+))
+
+
+; ************************************************************
+; Dada un switch clause devuelve la lista de programas que debe ejecutar
+; ************************************************************
+(defun armar-sec-prg (switch mem)
+(if (eq (car (nth 2 switch)) 'otherwise) (cadar (last switch))
+ (if (eq (evaluar (nth 1 switch) mem) (nth 1 (nth 2 switch))) 
+  (if (eq (caar (last (nth 2(nth 2 switch)))) 'break) (butlast (nth 2 (nth 2 switch)))
+   (append (nth 2 (nth 2 switch)) (armar-sec-prg (append (list (nth 0 switch) 
+    (nth 1 switch)) (cdddr switch)) mem)))
+  (armar-sec-prg (append (list (nth 0 switch) (nth 1 switch)) (cdddr switch)) mem))
 ))
