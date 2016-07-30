@@ -311,8 +311,19 @@
 (defun armar-sec-prg (switch mem)
 (if (eq (car (nth 2 switch)) 'otherwise) (cadar (last switch))
  (if (eq (evaluar (nth 1 switch) mem) (nth 1 (nth 2 switch))) 
-  (if (eq (caar (last (nth 2(nth 2 switch)))) 'break) (butlast (nth 2 (nth 2 switch)))
-   (append (nth 2 (nth 2 switch)) (armar-sec-prg (append (list (nth 0 switch) 
-    (nth 1 switch)) (cdddr switch)) mem)))
+  (sec-case (cddr switch))
   (armar-sec-prg (append (list (nth 0 switch) (nth 1 switch)) (cdddr switch)) mem))
+))
+
+
+; ************************************************************
+; Dada una secuencia de case's del switch clause devuelve 
+; la lista de programas que debe ejecutar hasta el break o hasta
+; que se termina la lista
+; ************************************************************
+(defun sec-case (cases)
+(if (null cases) nil
+ (if (eq (caar cases) 'otherwise) (cadar cases) 
+  (if (eq (caar (last (nth 2 (car cases)))) 'break) (butlast (nth 2 (car cases)))
+   (append (nth 2 (car cases)) (sec-case (cdr cases)))))
 ))

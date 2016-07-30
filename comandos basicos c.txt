@@ -129,7 +129,7 @@ else
 ) ; cierra main
 )
 '(5) ; sublista con los valores a leer del programa
-) ;> ------> (1 20 0)
+) ;> ------> (1 0)
 (RUN '( (int a b)
 (main (
 (a = 1)
@@ -145,3 +145,18 @@ else
 )
 '(5) ; sublista con los valores a leer del programa
 ) ;> ------> (1)
+(RUN '( (int a b)
+(main (
+(a = 1)
+(b = 0)
+(switch (a + b)
+(case 1 ((printf a)(a ++)))
+(case 4 ((printf b)(b ++)))
+(case 8 ((printf a + b) (scanf a)))
+(otherwise ((printf a * 10) (printf b * 2)))
+) ; cierra switch
+)
+) ; cierra main
+)
+'(5) ; sublista con los valores a leer del programa
+) ;> ------> (1 0 3 50 2)
